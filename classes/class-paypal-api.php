@@ -390,10 +390,64 @@ class PMPro_PayPal_API {
 	/**
 	 * Verify a webhook signature.
 	 *
-	 * @param array $args Verification parameters.
+	 * The webhook_event value must be the original raw JSON body from PayPal,
+	 * not a re-encoded PHP array. Re-encoding can alter key order, escaping,
+	 * or float precision, which invalidates the signature PayPal computed
+	 * against the original bytes.
+	 *
+	 * @param array  $args     Verification parameters (without webhook_event).
+	 * @param string $raw_body The raw JSON webhook body from the incoming request.
 	 * @return array|WP_Error
 	 */
-	public function verify_webhook_signature( $args ) {
-		return $this->request( 'POST', '/v1/notifications/verify-webhook-signature', $args );
+	public function verify_webhook_signature( $args, $raw_body ) {
+		// Build the JSON payload manually so webhook_event uses the original
+		// raw JSON instead of a round-tripped PHP array.
+		$envelope = wp_json_encode( $args );
+
+		// Insert the raw webhook body as the webhook_event value before the closing brace.
+		$body = substr( $envelope, 0, -1 ) . ',"webhook_event":' . $raw_body . '}';
+
+		return $this->raw_request( 'POST', '/v1/notifications/verify-webhook-signature', $body );
+	}
+
+	/**
+	 * Make an authenticated API request with a pre-built JSON body string.
+	 *
+	 * Used when the body must preserve exact JSON formatting (e.g., webhook verification).
+	 *
+	 * @param string $method   HTTP method.
+	 * @param string $endpoint API endpoint path.
+	 * @param string $body     Pre-encoded JSON body string.
+	 * @return array|WP_Error Decoded response body or error.
+	 */
+	private function raw_request( $method, $endpoint, $body ) {
+		$token = $this->get_access_token();
+		if ( is_wp_error( $token ) ) {
+			return $token;
+		}
+
+		$response = wp_remote_request( $this->base_url . $endpoint, array(
+			'method'  => $method,
+			'timeout' => 60,
+			'headers' => array(
+				'Authorization' => 'Bearer ' . $token,
+				'Content-Type'  => 'application/json',
+			),
+			'body'    => $body,
+		) );
+
+		if ( is_wp_error( $response ) ) {
+			return $response;
+		}
+
+		$code          = wp_remote_retrieve_response_code( $response );
+		$response_body = json_decode( wp_remote_retrieve_body( $response ), true );
+
+		if ( $code >= 200 && $code < 300 ) {
+			return $response_body ?? array();
+		}
+
+		$error_message = $this->extract_error_message( $response_body );
+		return new WP_Error( 'pmpro_paypal_api_error', $error_message );
 	}
 }

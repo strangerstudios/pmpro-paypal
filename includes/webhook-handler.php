@@ -24,7 +24,7 @@ function pmpro_paypal_handle_webhook( $request ) {
 	}
 
 	// Verify webhook signature.
-	$verified = pmpro_paypal_verify_webhook( $request, $event );
+	$verified = pmpro_paypal_verify_webhook( $request );
 	if ( ! $verified ) {
 		$logstr .= 'Signature verification failed.';
 		pmpro_paypal_webhook_log( $logstr );
@@ -131,12 +131,12 @@ function pmpro_paypal_webhook_log( $logstr ) {
 
 /**
  * Verify PayPal webhook signature.
+ * This takes the raw body from the $request to validate the signature.
  *
  * @param WP_REST_Request $request The REST request.
- * @param array           $event The decoded event.
  * @return bool
  */
-function pmpro_paypal_verify_webhook( $request, $event ) {
+function pmpro_paypal_verify_webhook( $request ) {
 	$environment = get_option( 'pmpro_gateway_environment', 'sandbox' );
 	$suffix      = 'sandbox' === $environment ? '_sandbox' : '_live';
 	$webhook_id  = get_option( 'pmpro_paypal_webhook_id' . $suffix );
@@ -154,11 +154,10 @@ function pmpro_paypal_verify_webhook( $request, $event ) {
 		'transmission_sig'  => $headers['paypal_transmission_sig'][0] ?? '',
 		'transmission_time' => $headers['paypal_transmission_time'][0] ?? '',
 		'webhook_id'        => $webhook_id,
-		'webhook_event'     => $event,
 	);
 
 	$api    = new PMPro_PayPal_API();
-	$result = $api->verify_webhook_signature( $verify_args );
+	$result = $api->verify_webhook_signature( $verify_args, $request->get_body() );
 
 	if ( is_wp_error( $result ) ) {
 		return false;
