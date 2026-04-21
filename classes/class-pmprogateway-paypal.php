@@ -36,6 +36,9 @@ class PMProGateway_paypal extends PMProGateway {
 		// Refund hooks.
 		add_filter( 'pmpro_allowed_refunds_gateways', array( 'PMProGateway_paypal', 'allowed_refund_gateways' ) );
 		add_filter( 'pmpro_process_refund_paypal', array( 'PMProGateway_paypal', 'process_refund' ), 10, 2 );
+
+		// Admin scripts.
+		add_action( 'admin_enqueue_scripts', array( 'PMProGateway_paypal', 'admin_enqueue_scripts' ) );
 	}
 
 	/**
@@ -70,6 +73,23 @@ class PMProGateway_paypal extends PMProGateway {
 	// ---------------------------------------------------------------
 	// Helpers
 	// ---------------------------------------------------------------
+
+	/**
+	 * Enqueue admin scripts on PMPro admin pages.
+	 */
+	public static function admin_enqueue_scripts() {
+		$screen = get_current_screen();
+		if ( ! $screen || strpos( $screen->id, 'pmpro' ) === false ) {
+			return;
+		}
+		wp_enqueue_script(
+			'pmpro-paypal-admin',
+			PMPRO_PAYPAL_URL . 'js/pmpro-paypal-admin.js',
+			array( 'jquery' ),
+			PMPRO_PAYPAL_VERSION,
+			true
+		);
+	}
 
 	// ---------------------------------------------------------------
 	// Settings
@@ -113,6 +133,29 @@ class PMProGateway_paypal extends PMProGateway {
 								<input type="text" id="paypal_client_secret_live" name="paypal_client_secret_live" value="<?php echo esc_attr( $live_client_secret ); ?>" autocomplete="off" class="regular-text code pmpro-admin-secure-key" />
 							</td>
 						</tr>
+						<?php if ( ! empty( $live_client_id ) || ! empty( $live_client_secret ) ) : ?>
+						<tr class="gateway gateway_paypal">
+							<th scope="row" valign="top">
+								<label for="paypal_webhook_id_live"><?php esc_html_e( 'Live Webhook ID', 'pmpro-paypal' ); ?></label>
+							</th>
+							<td>
+								<input
+									type="text"
+									id="paypal_webhook_id_live"
+									name="paypal_webhook_id_live"
+									value="<?php echo esc_attr( $live_webhook_id ); ?>"
+									class="regular-text code"
+									<?php if ( ! empty( $live_webhook_id ) ) echo 'readonly'; ?>
+								/>
+								<?php if ( ! empty( $live_webhook_id ) ) : ?>
+								<button type="button" class="button pmpro-paypal-edit-webhook-id" data-target="paypal_webhook_id_live">
+									<?php esc_html_e( 'Edit', 'pmpro-paypal' ); ?>
+								</button>
+								<?php endif; ?>
+								<p class="description"><?php esc_html_e( 'The PayPal Webhook ID used to verify incoming webhook events.', 'pmpro-paypal' ); ?></p>
+							</td>
+						</tr>
+						<?php endif; ?>
 					</tbody>
 				</table>
 			</div>
@@ -143,6 +186,29 @@ class PMProGateway_paypal extends PMProGateway {
 								<input type="text" id="paypal_client_secret_sandbox" name="paypal_client_secret_sandbox" value="<?php echo esc_attr( $sb_client_secret ); ?>" autocomplete="off" class="regular-text code pmpro-admin-secure-key" />
 							</td>
 						</tr>
+						<?php if ( ! empty( $sb_client_id ) || ! empty( $sb_client_secret ) ) : ?>
+						<tr class="gateway gateway_paypal">
+							<th scope="row" valign="top">
+								<label for="paypal_webhook_id_sandbox"><?php esc_html_e( 'Sandbox Webhook ID', 'pmpro-paypal' ); ?></label>
+							</th>
+							<td>
+								<input
+									type="text"
+									id="paypal_webhook_id_sandbox"
+									name="paypal_webhook_id_sandbox"
+									value="<?php echo esc_attr( $sb_webhook_id ); ?>"
+									class="regular-text code"
+									<?php if ( ! empty( $sb_webhook_id ) ) echo 'readonly'; ?>
+								/>
+								<?php if ( ! empty( $sb_webhook_id ) ) : ?>
+								<button type="button" class="button pmpro-paypal-edit-webhook-id" data-target="paypal_webhook_id_sandbox">
+									<?php esc_html_e( 'Edit', 'pmpro-paypal' ); ?>
+								</button>
+								<?php endif; ?>
+								<p class="description"><?php esc_html_e( 'The PayPal Webhook ID used to verify incoming webhook events.', 'pmpro-paypal' ); ?></p>
+							</td>
+						</tr>
+						<?php endif; ?>
 					</tbody>
 				</table>
 			</div>
@@ -163,14 +229,7 @@ class PMProGateway_paypal extends PMProGateway {
 							</th>
 							<td>
 								<p><code><?php echo esc_html( $webhook_url ); ?></code></p>
-								<?php
-								$environment = get_option( 'pmpro_gateway_environment', 'sandbox' );
-								$webhook_id  = 'sandbox' === $environment ? $sb_webhook_id : $live_webhook_id;
-								if ( ! empty( $webhook_id ) ) : ?>
-									<p class="description"><?php printf( esc_html__( 'Webhook ID: %s (auto-registered)', 'pmpro-paypal' ), esc_html( $webhook_id ) ); ?></p>
-								<?php else : ?>
-									<p class="description"><?php esc_html_e( 'Webhook will be auto-registered when credentials are saved.', 'pmpro-paypal' ); ?></p>
-								<?php endif; ?>
+								<p class="description"><?php esc_html_e( 'Register this URL as a webhook endpoint in your PayPal dashboard, or save your API credentials to auto-register.', 'pmpro-paypal' ); ?></p>
 							</td>
 						</tr>
 					</tbody>
@@ -200,11 +259,19 @@ class PMProGateway_paypal extends PMProGateway {
 			update_option( 'pmpro_paypal_client_secret_sandbox', sanitize_text_field( $_REQUEST['paypal_client_secret_sandbox'] ) );
 		}
 
+		// Save manual webhook IDs (only if posted; empty value clears for re-registration).
+		if ( isset( $_REQUEST['paypal_webhook_id_live'] ) ) {
+			update_option( 'pmpro_paypal_webhook_id_live', sanitize_text_field( $_REQUEST['paypal_webhook_id_live'] ) );
+		}
+		if ( isset( $_REQUEST['paypal_webhook_id_sandbox'] ) ) {
+			update_option( 'pmpro_paypal_webhook_id_sandbox', sanitize_text_field( $_REQUEST['paypal_webhook_id_sandbox'] ) );
+		}
+
 		// Clear cached OAuth tokens for both environments.
 		delete_transient( 'pmpro_paypal_token_live' );
 		delete_transient( 'pmpro_paypal_token_sandbox' );
 
-		// Auto-register webhook for the active environment.
+		// Auto-register webhook for the active environment if no webhook ID is set.
 		$environment = get_option( 'pmpro_gateway_environment', 'sandbox' );
 		$suffix      = 'sandbox' === $environment ? '_sandbox' : '_live';
 		$client_id   = get_option( 'pmpro_paypal_client_id' . $suffix );
