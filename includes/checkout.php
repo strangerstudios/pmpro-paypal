@@ -225,33 +225,21 @@ function pmpro_paypal_applydiscountcode_return_js( $discount_code, $discount_cod
 	if ( pmpro_isLevelFree( $code_level ) ) {
 		?>
 		jQuery('#pmpro_payment_method').hide();
-		jQuery('#pmpro_billing_address_fields').hide();
-		jQuery('#pmpro_payment_information_fields').hide();
-		jQuery('#pmpro_submit_span').show();
-		jQuery('#pmpro_paypal_checkout').hide();
-		pmpro_require_billing = false;
+		showFreeCheckout();
 		<?php
 	} else {
+		// Drive the UI off the currently checked gateway, not pmpro_require_billing.
+		// The toggle handlers mutate pmpro_require_billing as UI state, so reading
+		// it here was conflating "level requires billing" with "current UI state."
 		?>
 		jQuery('#pmpro_payment_method').show();
-		if (jQuery('input[name=gateway]:checked').val() !== 'paypal' && pmpro_require_billing === true) {
-			jQuery('#pmpro_paypal_checkout').hide();
-			jQuery('#pmpro_billing_address_fields').show();
-			jQuery('#pmpro_payment_information_fields').show();
-			jQuery('#pmpro_submit_span').show();
-			pmpro_require_billing = true;
-		} else if (pmpro_require_billing === true) {
-			jQuery('#pmpro_billing_address_fields').hide();
-			jQuery('#pmpro_payment_information_fields').hide();
-			jQuery('#pmpro_submit_span').hide();
-			jQuery('#pmpro_paypal_checkout').show();
-			pmpro_require_billing = false;
+		var pmpro_paypal_chosen = jQuery('input[name=gateway]:checked').val();
+		if (pmpro_paypal_chosen === 'paypal') {
+			showPayPalCheckout();
+		} else if (pmpro_paypal_chosen === 'check') {
+			showCheckCheckout();
 		} else {
-			jQuery('#pmpro_billing_address_fields').hide();
-			jQuery('#pmpro_payment_information_fields').hide();
-			jQuery('#pmpro_submit_span').show();
-			jQuery('#pmpro_paypal_checkout').hide();
-			pmpro_require_billing = false;
+			showCreditCardCheckout();
 		}
 		<?php
 	}
