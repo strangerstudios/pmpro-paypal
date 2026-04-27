@@ -4,7 +4,7 @@ Tags: paypal, paid memberships pro, pmpro, payments, subscriptions
 Requires at least: 5.4
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.0
+Stable tag: 1.1
 License: GPL-2.0+
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -107,6 +107,12 @@ No. This plugin uses PayPal Webhooks (the modern replacement for IPN), and they 
 * **OAuth2** (`/v1/oauth2/token`) for authentication
 
 == Changelog ==
+
+= 1.1 - 2026-04-27 =
+* FEATURE: Added support for offering PayPal as a secondary payment gateway alongside another primary gateway at checkout. #10 (@dparker1005)
+* ENHANCEMENT: Added a setting to manually edit the PayPal Webhook ID for both the Sandbox and Live environments. #9 (@andrewlimaza)
+* ENHANCEMENT: The PayPal webhook REST endpoint now accepts GET requests so site owners can confirm the URL is reachable from a browser. #11 (@dparker1005)
+* BUG FIX: Fixed PayPal webhook signature verification by sending the original raw webhook body to PayPal instead of a re-encoded version. #8 (@ideadude)
 
 = 1.0 - 2026-03-30 =
 * Initial release.
