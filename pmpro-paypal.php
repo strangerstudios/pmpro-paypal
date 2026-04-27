@@ -38,6 +38,9 @@ function pmpro_paypal_init() {
 	require_once PMPRO_PAYPAL_DIR . 'classes/class-paypal-api.php';
 	require_once PMPRO_PAYPAL_DIR . 'classes/class-pmprogateway-paypal.php';
 
+	// Secondary-gateway checkout UI.
+	require_once PMPRO_PAYPAL_DIR . 'includes/checkout.php';
+
 	// Register webhook REST route.
 	add_action( 'rest_api_init', 'pmpro_paypal_register_webhook_route' );
 
@@ -91,16 +94,25 @@ function pmpro_paypal_gateway_ready( $r ) {
 	global $pmpro_gateway_ready;
 	$gateway = pmpro_getGateway();
 	if ( 'paypal' === $gateway ) {
-		$environment = get_option( 'pmpro_gateway_environment', 'sandbox' );
-		$suffix      = 'sandbox' === $environment ? '_sandbox' : '_live';
-		$client_id   = get_option( 'pmpro_paypal_client_id' . $suffix );
-		$secret      = get_option( 'pmpro_paypal_client_secret' . $suffix );
-		$pmpro_gateway_ready = ! empty( $client_id ) && ! empty( $secret );
+		$pmpro_gateway_ready = pmpro_paypal_has_credentials();
 		if ( $pmpro_gateway_ready ) {
 			$r = true;
 		}
 	}
 	return $r;
+}
+
+/**
+ * Whether PayPal credentials are configured for the active environment.
+ *
+ * @return bool
+ */
+function pmpro_paypal_has_credentials() {
+	$environment = get_option( 'pmpro_gateway_environment', 'sandbox' );
+	$suffix      = 'sandbox' === $environment ? '_sandbox' : '_live';
+	$client_id   = get_option( 'pmpro_paypal_client_id' . $suffix );
+	$secret      = get_option( 'pmpro_paypal_client_secret' . $suffix );
+	return ! empty( $client_id ) && ! empty( $secret );
 }
 
 /**

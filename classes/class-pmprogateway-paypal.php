@@ -28,9 +28,17 @@ class PMProGateway_paypal extends PMProGateway {
 		$gateway = pmpro_getGateway();
 		if ( 'paypal' === $gateway ) {
 			add_filter( 'pmpro_required_billing_fields', array( 'PMProGateway_paypal', 'pmpro_required_billing_fields' ) );
-			add_filter( 'pmpro_include_billing_address_fields', '__return_false' );
-			add_filter( 'pmpro_include_payment_information_fields', '__return_false' );
-			add_filter( 'pmpro_checkout_default_submit_button', array( 'PMProGateway_paypal', 'pmpro_checkout_default_submit_button' ) );
+
+			// When PayPal is the primary gateway we own the entire checkout
+			// and strip out billing/payment fields + swap the submit button.
+			// When PayPal is running as a secondary option those fields stay
+			// in the DOM so the user can switch back — the pmpro-paypal.php
+			// checkout boxes hook renders the PayPal button in that case.
+			if ( 'paypal' === get_option( 'pmpro_gateway' ) ) {
+				add_filter( 'pmpro_include_billing_address_fields', '__return_false' );
+				add_filter( 'pmpro_include_payment_information_fields', '__return_false' );
+				add_filter( 'pmpro_checkout_default_submit_button', array( 'PMProGateway_paypal', 'pmpro_checkout_default_submit_button' ) );
+			}
 		}
 
 		// Refund hooks.
