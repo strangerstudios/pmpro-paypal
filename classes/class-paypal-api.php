@@ -101,13 +101,14 @@ class PMPro_PayPal_API {
 	/**
 	 * Make an authenticated API request.
 	 *
-	 * @param string $method HTTP method (GET, POST, DELETE, PATCH).
-	 * @param string $endpoint API endpoint path (e.g., /v2/checkout/orders).
-	 * @param array  $body Request body (for POST/PATCH).
-	 * @param int    $retries Number of retry attempts on 5xx errors.
+	 * @param string       $method      HTTP method (GET, POST, DELETE, PATCH).
+	 * @param string       $endpoint    API endpoint path (e.g., /v2/checkout/orders).
+	 * @param array|string $body        Request body (for POST/PATCH).
+	 * @param int          $retries     Number of retry attempts on 5xx errors.
+	 * @param bool         $body_is_raw Whether the body is a prebuilt JSON string.
 	 * @return array|WP_Error Decoded response body or error.
 	 */
-	private function request( $method, $endpoint, $body = array(), $retries = 3 ) {
+	private function request( $method, $endpoint, $body = array(), $retries = 3, $body_is_raw = false ) {
 		$token = $this->get_access_token();
 		if ( is_wp_error( $token ) ) {
 			return $token;
@@ -127,7 +128,7 @@ class PMPro_PayPal_API {
 		);
 
 		if ( ! empty( $body ) && in_array( $method, array( 'POST', 'PATCH' ), true ) ) {
-			$args['body'] = wp_json_encode( $body );
+			$args['body'] = $body_is_raw ? $body : wp_json_encode( $body );
 		}
 
 		$attempt = 0;
@@ -390,10 +391,19 @@ class PMPro_PayPal_API {
 	/**
 	 * Verify a webhook signature.
 	 *
-	 * @param array $args Verification parameters.
+	 * The webhook_event value must be the original raw JSON body from PayPal,
+	 * not a re-encoded PHP array. Re-encoding can alter key order, escaping,
+	 * or float precision, which invalidates the signature PayPal computed
+	 * against the original bytes.
+	 *
+	 * @param array  $args     Verification parameters (without webhook_event).
+	 * @param string $raw_body The raw JSON webhook body from the incoming request.
 	 * @return array|WP_Error
 	 */
-	public function verify_webhook_signature( $args ) {
-		return $this->request( 'POST', '/v1/notifications/verify-webhook-signature', $args );
+	public function verify_webhook_signature( $args, $raw_body ) {
+		$envelope = wp_json_encode( $args );
+		$body     = substr( $envelope, 0, -1 ) . ',"webhook_event":' . $raw_body . '}';
+
+		return $this->request( 'POST', '/v1/notifications/verify-webhook-signature', $body, 3, true );
 	}
 }
