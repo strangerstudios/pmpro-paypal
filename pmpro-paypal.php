@@ -48,19 +48,35 @@ add_action( 'plugins_loaded', 'pmpro_paypal_init', 20 );
 
 /**
  * Register webhook REST route.
+ *
+ * GET is accepted alongside POST so the URL can be opened in a browser
+ * to confirm the endpoint is reachable, matching the convention used by
+ * the other PMPro gateway webhook handlers. The callback no-ops on GET.
  */
 function pmpro_paypal_register_webhook_route() {
 	register_rest_route( 'pmpro-paypal/v1', '/webhook', array(
-		'methods'             => 'POST',
+		'methods'             => array( 'GET', 'POST' ),
 		'callback'            => 'pmpro_paypal_webhook_callback',
 		'permission_callback' => '__return_true',
 	) );
 }
 
 /**
- * Webhook callback — delegates to the handler.
+ * Webhook callback — delegates POST requests to the handler. GET requests
+ * return a static "ok" response so the URL is browser-pingable; routing
+ * them through the handler would just log a signature-verification failure
+ * on every bot crawl.
  */
 function pmpro_paypal_webhook_callback( $request ) {
+	if ( 'POST' !== $request->get_method() ) {
+		return new WP_REST_Response(
+			array(
+				'status'  => 'ok',
+				'message' => 'PMPro PayPal webhook endpoint is reachable.',
+			),
+			200
+		);
+	}
 	require_once PMPRO_PAYPAL_DIR . 'includes/webhook-handler.php';
 	return pmpro_paypal_handle_webhook( $request );
 }
