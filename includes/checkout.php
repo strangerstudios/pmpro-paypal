@@ -10,7 +10,6 @@
 defined( 'ABSPATH' ) || exit;
 
 add_filter( 'pmpro_valid_gateways', 'pmpro_paypal_valid_gateways' );
-add_action( 'wp_enqueue_scripts', 'pmpro_paypal_enqueue_styles' );
 add_action( 'pmpro_checkout_boxes', 'pmpro_paypal_checkout_boxes', 20 );
 add_action( 'pmpro_applydiscountcode_return_js', 'pmpro_paypal_applydiscountcode_return_js', 10, 4 );
 add_action( 'init', 'pmpro_paypal_init_pbc_integration' );
@@ -41,16 +40,6 @@ function pmpro_paypal_valid_gateways( $gateways ) {
 		$gateways[] = 'paypal';
 	}
 	return $gateways;
-}
-
-/**
- * Enqueue styles for the secondary checkout UI.
- */
-function pmpro_paypal_enqueue_styles() {
-	if ( ! pmpro_paypal_is_secondary() ) {
-		return;
-	}
-	wp_enqueue_style( 'pmpro-paypal', PMPRO_PAYPAL_URL . 'css/pmpro-paypal.css', array(), PMPRO_PAYPAL_VERSION );
 }
 
 /**
@@ -91,14 +80,20 @@ function pmpro_paypal_checkout_boxes() {
 				<div class="<?php echo esc_attr( pmpro_get_element_class( 'pmpro_form_fields' ) ); ?>">
 					<div class="<?php echo esc_attr( pmpro_get_element_class( 'pmpro_form_field pmpro_form_field-radio' ) ); ?>">
 						<div class="<?php echo esc_attr( pmpro_get_element_class( 'pmpro_form_field-radio-items' ) ); ?>">
-							<?php if ( 'check' !== $setting_gateway ) { ?>
-								<div class="<?php echo esc_attr( pmpro_get_element_class( 'pmpro_form_field pmpro_form_field-radio-item' ) ); ?> gateway_<?php echo esc_attr( $setting_gateway ); ?>">
-									<input type="radio" id="gateway_<?php echo esc_attr( $setting_gateway ); ?>" name="gateway" class="<?php echo esc_attr( pmpro_get_element_class( 'pmpro_form_input pmpro_form_input-radio' ) ); ?>" value="<?php echo esc_attr( $setting_gateway ); ?>" <?php checked( empty( $gateway ) || $gateway === $setting_gateway ); ?> />
-									<label for="gateway_<?php echo esc_attr( $setting_gateway ); ?>" class="<?php echo esc_attr( pmpro_get_element_class( 'pmpro_form_label pmpro_form_label-inline pmpro_clickable' ) ); ?>">
-										<?php esc_html_e( 'Check Out with a Credit Card', 'pmpro-paypal' ); ?>
-									</label>
-								</div>
-							<?php } ?>
+							<?php
+							if ( 'check' === $setting_gateway ) {
+								$check_gateway_label = get_option( 'pmpro_check_gateway_label' ) ?: __( 'Check', 'pmpro-paypal' );
+								$primary_label       = sprintf( __( 'Pay by %s', 'pmpro-paypal' ), $check_gateway_label );
+							} else {
+								$primary_label = __( 'Check Out with a Credit Card', 'pmpro-paypal' );
+							}
+							?>
+							<div class="<?php echo esc_attr( pmpro_get_element_class( 'pmpro_form_field pmpro_form_field-radio-item' ) ); ?> gateway_<?php echo esc_attr( $setting_gateway ); ?>">
+								<input type="radio" id="gateway_<?php echo esc_attr( $setting_gateway ); ?>" name="gateway" class="<?php echo esc_attr( pmpro_get_element_class( 'pmpro_form_input pmpro_form_input-radio' ) ); ?>" value="<?php echo esc_attr( $setting_gateway ); ?>" <?php checked( empty( $gateway ) || $gateway === $setting_gateway ); ?> />
+								<label for="gateway_<?php echo esc_attr( $setting_gateway ); ?>" class="<?php echo esc_attr( pmpro_get_element_class( 'pmpro_form_label pmpro_form_label-inline pmpro_clickable' ) ); ?>">
+									<?php echo esc_html( $primary_label ); ?>
+								</label>
+							</div>
 
 							<div class="<?php echo esc_attr( pmpro_get_element_class( 'pmpro_form_field pmpro_form_field-radio-item' ) ); ?> gateway_paypal">
 								<input type="radio" id="gateway_paypal" name="gateway" class="<?php echo esc_attr( pmpro_get_element_class( 'pmpro_form_input pmpro_form_input-radio' ) ); ?>" value="paypal" <?php checked( 'paypal' === $gateway ); ?> />
