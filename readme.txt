@@ -4,7 +4,7 @@ Tags: paypal, paid memberships pro, pmpro, payments, subscriptions
 Requires at least: 5.4
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.1
+Stable tag: 1.1.1
 License: GPL-2.0+
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -107,6 +107,9 @@ No. This plugin uses PayPal Webhooks (the modern replacement for IPN), and they 
 * **OAuth2** (`/v1/oauth2/token`) for authentication
 
 == Changelog ==
+
+= 1.1.1 - 2026-05-07 =
+* BUG FIX: Fixed a `DECIMAL_PRECISION` error from the PayPal billing API when checking out a recurring level whose initial payment is 0 on a zero-decimal currency (JPY, KRW, VND, UAH, ALL). The setup fee is now formatted via `pmpro_round_price_as_string()` so it matches the site currency. #12 (@dparker1005)
 
 = 1.1 - 2026-04-27 =
 * FEATURE: Added support for offering PayPal as a secondary payment gateway alongside another primary gateway at checkout. #10 (@dparker1005)
