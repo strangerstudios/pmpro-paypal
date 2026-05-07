@@ -439,7 +439,7 @@ class PMProGateway_paypal extends PMProGateway {
 		// PayPal's first regular billing cycle starts at start_time (one period out),
 		// so the setup fee is how the initial payment is collected.
 		$setup_fee = array(
-			'value'         => (float) $initial > 0 ? $initial : '0.00',
+			'value'         => (float) $initial > 0 ? $initial : pmpro_round_price_as_string( 0, $currency ),
 			'currency_code' => $currency,
 		);
 
