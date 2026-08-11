@@ -108,6 +108,9 @@ No. This plugin uses PayPal Webhooks (the modern replacement for IPN), and they 
 
 == Changelog ==
 
+= TBD =
+* BUG FIX: Fixed the subscription `start_time` sent to PayPal being offset by the site's timezone (e.g. 9 hours early on Asia/Tokyo sites). The profile start date is now formatted with a literal UTC designator like the legacy gateways. #14 (@flintfromthebasement)
+
 = 1.1.1 - 2026-05-07 =
 * BUG FIX: Fixed a `DECIMAL_PRECISION` error from the PayPal billing API when checking out a recurring level whose initial payment is 0 on a zero-decimal currency (JPY, KRW, VND, UAH, ALL). The setup fee is now formatted via `pmpro_round_price_as_string()` so it matches the site currency. #12 (@dparker1005)
 
