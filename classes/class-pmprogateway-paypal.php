@@ -609,7 +609,8 @@ class PMProGateway_paypal extends PMProGateway {
 			}
 
 			// Calculate profile start date (applies pmpro_set_profile_date filter).
-			$profile_start_date = pmpro_calculate_profile_start_date( $order, 'c' );
+			// The helper returns UTC wall time, so use a literal Z designator; 'c' would mislabel it with the site's UTC offset.
+			$profile_start_date = pmpro_calculate_profile_start_date( $order, 'Y-m-d\TH:i:s\Z' );
 
 			$user = get_userdata( $order->user_id );
 
