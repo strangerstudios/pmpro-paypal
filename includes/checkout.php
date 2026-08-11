@@ -55,6 +55,20 @@ function pmpro_paypal_checkout_boxes() {
 
 	$setting_gateway = get_option( 'pmpro_gateway' );
 
+	// Integrate with the PMPro Pay by Check Add On: if this level is "check only," PBC's
+	// own checkout box (unhooked below in pmpro_paypal_init_pbc_integration()) would normally
+	// force the gateway to check and hide every other option. Replicate that here so check-only
+	// levels don't fall back to showing the primary gateway/PayPal picker.
+	if ( function_exists( 'pmpropbc_getOptions' ) && ! empty( $pmpro_level ) ) {
+		$pbc_options = pmpropbc_getOptions( $pmpro_level->id );
+		if ( isset( $pbc_options['setting'] ) && 2 == $pbc_options['setting'] ) {
+			?>
+			<input type="hidden" name="gateway" value="check" />
+			<?php
+			return;
+		}
+	}
+
 	// Review flow — the user has been sent offsite and returned. Keep the
 	// fields hidden so nothing shifts around under them.
 	if ( ! empty( $pmpro_review ) ) {
