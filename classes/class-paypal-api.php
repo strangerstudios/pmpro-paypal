@@ -184,21 +184,43 @@ class PMPro_PayPal_API {
 	 * Extract a human-readable error message from PayPal error response.
 	 */
 	private function extract_error_message( $body ) {
+		$message = '';
+
 		if ( ! empty( $body['details'] ) && is_array( $body['details'] ) ) {
 			$messages = array();
 			foreach ( $body['details'] as $detail ) {
+				$detail_message = '';
 				if ( ! empty( $detail['description'] ) ) {
-					$messages[] = $detail['description'];
+					$detail_message = $detail['description'];
 				} elseif ( ! empty( $detail['issue'] ) ) {
-					$messages[] = $detail['issue'];
+					$detail_message = $detail['issue'];
+				}
+
+				// Include the field pointer so generic descriptions like
+				// "The value of a field is invalid." identify the field.
+				if ( ! empty( $detail['field'] ) ) {
+					$detail_message = trim( $detail_message . ' (field: ' . $detail['field'] . ')' );
+				}
+
+				if ( ! empty( $detail_message ) ) {
+					$messages[] = $detail_message;
 				}
 			}
 			if ( ! empty( $messages ) ) {
-				return implode( ' ', $messages );
+				$message = implode( ' ', $messages );
 			}
 		}
 
-		return $body['message'] ?? $body['error_description'] ?? 'Unknown PayPal API error.';
+		if ( empty( $message ) ) {
+			$message = $body['message'] ?? $body['error_description'] ?? 'Unknown PayPal API error.';
+		}
+
+		// PayPal merchant support asks for the debug ID when investigating failures.
+		if ( ! empty( $body['debug_id'] ) ) {
+			$message .= ' [PayPal debug ID: ' . $body['debug_id'] . ']';
+		}
+
+		return $message;
 	}
 
 	// ---------------------------------------------------------------
