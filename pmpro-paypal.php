@@ -3,7 +3,7 @@
  * Plugin Name: Paid Memberships Pro - PayPal Gateway
  * Plugin URI: https://www.paidmembershipspro.com/add-ons/pmpro-paypal/
  * Description: Modern PayPal integration using Orders V2 and Subscriptions API v1 with offsite redirect checkout.
- * Version: 1.1.1
+ * Version: 1.1.2
  * Author: Paid Memberships Pro
  * Author URI: https://www.paidmembershipspro.com
  * Text Domain: pmpro-paypal
@@ -13,7 +13,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'PMPRO_PAYPAL_VERSION', '1.1.1' );
+define( 'PMPRO_PAYPAL_VERSION', '1.1.2' );
 define( 'PMPRO_PAYPAL_DIR', plugin_dir_path( __FILE__ ) );
 define( 'PMPRO_PAYPAL_URL', plugin_dir_url( __FILE__ ) );
 define( 'PMPRO_PAYPAL_BASENAME', plugin_basename( __FILE__ ) );

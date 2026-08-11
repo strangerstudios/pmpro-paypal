@@ -2,9 +2,9 @@
 Contributors: strangerstudios, paidmembershipspro
 Tags: paypal, paid memberships pro, pmpro, payments, subscriptions
 Requires at least: 5.4
-Tested up to: 6.9
+Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.1.1
+Stable tag: 1.1.2
 License: GPL-2.0+
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -108,9 +108,10 @@ No. This plugin uses PayPal Webhooks (the modern replacement for IPN), and they 
 
 == Changelog ==
 
-= TBD =
-* ENHANCEMENT: PayPal API error messages now include the offending field path and PayPal's debug ID, so errors like "The value of a field is invalid." identify the invalid field and can be traced with PayPal support. #15 (@flintfromthebasement)
-* BUG FIX: Fixed the subscription `start_time` sent to PayPal being offset by the site's timezone (e.g. 9 hours early on Asia/Tokyo sites). The profile start date is now formatted with a literal UTC designator like the legacy gateways. #14 (@flintfromthebasement)
+= 1.1.2 - 2026-08-11 =
+* ENHANCEMENT: PayPal API error messages now include the offending field path and PayPal's debug ID, so errors like "The value of a field is invalid." identify the invalid field and can be traced with PayPal support. #17 (@flintfromthebasement)
+* BUG FIX: Fixed the subscription `start_time` sent to PayPal being labeled with the site's timezone instead of UTC, which could shift the first renewal to the wrong day depending on the checkout time and the site timezone. #16 (@flintfromthebasement)
+* BUG FIX: Fixed membership levels set to "check only" in the Pay by Check Add On still displaying the payment method picker when PayPal was configured as a secondary gateway. #13 (@davidmutero)
 
 = 1.1.1 - 2026-05-07 =
 * BUG FIX: Fixed a `DECIMAL_PRECISION` error from the PayPal billing API when checking out a recurring level whose initial payment is 0 on a zero-decimal currency (JPY, KRW, VND, UAH, ALL). The setup fee is now formatted via `pmpro_round_price_as_string()` so it matches the site currency. #12 (@dparker1005)
