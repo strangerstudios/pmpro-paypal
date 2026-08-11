@@ -109,6 +109,7 @@ No. This plugin uses PayPal Webhooks (the modern replacement for IPN), and they 
 == Changelog ==
 
 = TBD =
+* ENHANCEMENT: PayPal API error messages now include the offending field path and PayPal's debug ID, so errors like "The value of a field is invalid." identify the invalid field and can be traced with PayPal support. #15 (@flintfromthebasement)
 * BUG FIX: Fixed the subscription `start_time` sent to PayPal being offset by the site's timezone (e.g. 9 hours early on Asia/Tokyo sites). The profile start date is now formatted with a literal UTC designator like the legacy gateways. #14 (@flintfromthebasement)
 
 = 1.1.1 - 2026-05-07 =
