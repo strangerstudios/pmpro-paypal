@@ -572,6 +572,7 @@ class PMProGateway_paypal extends PMProGateway {
 		}
 
 		// Prepare for offsite async payment.
+		$order->payment_type = "PayPal";
 		$order->status = 'token';
 		$order->saveOrder();
 		pmpro_save_checkout_data_to_order( $order );
