@@ -2,9 +2,9 @@
 Contributors: strangerstudios, paidmembershipspro
 Tags: paypal, paid memberships pro, pmpro, payments, subscriptions
 Requires at least: 5.4
-Tested up to: 7.0
+Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.1.2
+Stable tag: 1.1.3
 License: GPL-2.0+
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -107,6 +107,9 @@ No. This plugin uses PayPal Webhooks (the modern replacement for IPN), and they 
 * **OAuth2** (`/v1/oauth2/token`) for authentication
 
 == Changelog ==
+
+= 1.1.3 - 2026-09-15 =
+* BUG FIX: Orders created through this gateway now record "PayPal" as the payment type, so the Orders list, the Edit Order page, and member invoices no longer show a blank payment method. #19 (@becleung)
 
 = 1.1.2 - 2026-08-11 =
 * ENHANCEMENT: PayPal API error messages now include the offending field path and PayPal's debug ID, so errors like "The value of a field is invalid." identify the invalid field and can be traced with PayPal support. #17 (@flintfromthebasement)
