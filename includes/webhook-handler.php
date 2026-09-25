@@ -190,6 +190,7 @@ function pmpro_paypal_handle_checkout_order_approved( $resource ) {
 	}
 
 	// Find the PMPro order by paypal_order_id meta.
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Prepared lookup on the PMPro order meta table; no WP API for this reverse lookup.
 	$pmpro_order_id = $wpdb->get_var( $wpdb->prepare(
 		"SELECT pmpro_membership_order_id FROM {$wpdb->pmpro_membership_ordermeta} WHERE meta_key = 'paypal_order_id' AND meta_value = %s LIMIT 1",
 		$paypal_order_id

@@ -251,29 +251,31 @@ class PMProGateway_paypal extends PMProGateway {
 	 * Save settings and auto-register webhook.
 	 */
 	public static function save_settings_fields() {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- Called from PMPro core adminpages/paymentsettings.php after check_admin_referer( 'savesettings', 'pmpro_paymentsettings_nonce' ) and a manage_options/pmpro_paymentsettings capability check.
 		// Save live credentials.
 		if ( isset( $_REQUEST['paypal_client_id_live'] ) ) {
-			update_option( 'pmpro_paypal_client_id_live', sanitize_text_field( $_REQUEST['paypal_client_id_live'] ) );
+			update_option( 'pmpro_paypal_client_id_live', sanitize_text_field( wp_unslash( $_REQUEST['paypal_client_id_live'] ) ) );
 		}
 		if ( isset( $_REQUEST['paypal_client_secret_live'] ) ) {
-			update_option( 'pmpro_paypal_client_secret_live', sanitize_text_field( $_REQUEST['paypal_client_secret_live'] ) );
+			update_option( 'pmpro_paypal_client_secret_live', sanitize_text_field( wp_unslash( $_REQUEST['paypal_client_secret_live'] ) ) );
 		}
 
 		// Save sandbox credentials.
 		if ( isset( $_REQUEST['paypal_client_id_sandbox'] ) ) {
-			update_option( 'pmpro_paypal_client_id_sandbox', sanitize_text_field( $_REQUEST['paypal_client_id_sandbox'] ) );
+			update_option( 'pmpro_paypal_client_id_sandbox', sanitize_text_field( wp_unslash( $_REQUEST['paypal_client_id_sandbox'] ) ) );
 		}
 		if ( isset( $_REQUEST['paypal_client_secret_sandbox'] ) ) {
-			update_option( 'pmpro_paypal_client_secret_sandbox', sanitize_text_field( $_REQUEST['paypal_client_secret_sandbox'] ) );
+			update_option( 'pmpro_paypal_client_secret_sandbox', sanitize_text_field( wp_unslash( $_REQUEST['paypal_client_secret_sandbox'] ) ) );
 		}
 
 		// Save manual webhook IDs (only if posted; empty value clears for re-registration).
 		if ( isset( $_REQUEST['paypal_webhook_id_live'] ) ) {
-			update_option( 'pmpro_paypal_webhook_id_live', sanitize_text_field( $_REQUEST['paypal_webhook_id_live'] ) );
+			update_option( 'pmpro_paypal_webhook_id_live', sanitize_text_field( wp_unslash( $_REQUEST['paypal_webhook_id_live'] ) ) );
 		}
 		if ( isset( $_REQUEST['paypal_webhook_id_sandbox'] ) ) {
-			update_option( 'pmpro_paypal_webhook_id_sandbox', sanitize_text_field( $_REQUEST['paypal_webhook_id_sandbox'] ) );
+			update_option( 'pmpro_paypal_webhook_id_sandbox', sanitize_text_field( wp_unslash( $_REQUEST['paypal_webhook_id_sandbox'] ) ) );
 		}
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 		// Clear cached OAuth tokens for both environments.
 		delete_transient( 'pmpro_paypal_token_live' );
@@ -657,7 +659,7 @@ class PMProGateway_paypal extends PMProGateway {
 			foreach ( $links as $link ) {
 				if ( 'approve' === ( $link['rel'] ?? '' ) ) {
 					header( 'Referrer-Policy: no-referrer' );
-					wp_redirect( $link['href'] );
+					wp_redirect( $link['href'] ); // phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect -- Offsite redirect to the PayPal approval URL returned by the PayPal API.
 					exit;
 				}
 			}
@@ -713,7 +715,7 @@ class PMProGateway_paypal extends PMProGateway {
 				if ( 'approve' === ( $link['rel'] ?? '' ) ) {
 					// PayPal rejects checkout requests that carry a third-party Referer header.
 					header( 'Referrer-Policy: no-referrer' );
-					wp_redirect( $link['href'] );
+					wp_redirect( $link['href'] ); // phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect -- Offsite redirect to the PayPal approval URL returned by the PayPal API.
 					exit;
 				}
 			}
