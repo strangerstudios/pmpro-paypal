@@ -122,7 +122,8 @@ function pmpro_paypal_has_credentials() {
  */
 function pmpro_paypal_needs_core_upgrade_notice() {
 	// Only show on PMPro admin pages.
-	if ( ! isset( $_REQUEST['page'] ) || strpos( sanitize_text_field( $_REQUEST['page'] ), 'pmpro-' ) !== 0 ) {
+	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only check of the current admin page to decide whether to show a notice.
+	if ( ! isset( $_REQUEST['page'] ) || strpos( sanitize_text_field( wp_unslash( $_REQUEST['page'] ) ), 'pmpro-' ) !== 0 ) {
 		return;
 	}
 	?>
