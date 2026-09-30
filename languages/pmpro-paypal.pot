@@ -2,21 +2,21 @@
 # This file is distributed under the GPL-2.0+.
 msgid ""
 msgstr ""
-"Project-Id-Version: Paid Memberships Pro - PayPal Gateway 1.1.3\n"
+"Project-Id-Version: Paid Memberships Pro - PayPal Gateway 1.1.4\n"
 "Report-Msgid-Bugs-To: info@paidmembershipspro.com\n"
 "Last-Translator: Paid Memberships Pro <info@paidmembershipspro.com>\n"
 "Language-Team: Paid Memberships Pro <info@paidmembershipspro.com>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-15T16:19:17+00:00\n"
+"POT-Creation-Date: 2026-09-30T16:58:07+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: pmpro-paypal\n"
 
 #. Plugin Name of the plugin
 #: pmpro-paypal.php
-#: pmpro-paypal.php:131
+#: pmpro-paypal.php:132
 msgid "Paid Memberships Pro - PayPal Gateway"
 msgstr ""
 
@@ -97,77 +97,77 @@ msgstr ""
 msgid "Register this URL as a webhook endpoint in your PayPal dashboard, or save your API credentials to auto-register."
 msgstr ""
 
-#: classes/class-pmprogateway-paypal.php:359
+#: classes/class-pmprogateway-paypal.php:361
 #: includes/checkout.php:115
 msgid "Check Out with PayPal"
 msgstr ""
 
-#: classes/class-pmprogateway-paypal.php:365
+#: classes/class-pmprogateway-paypal.php:367
 msgid "Submit and Check Out"
 msgstr ""
 
-#: classes/class-pmprogateway-paypal.php:365
+#: classes/class-pmprogateway-paypal.php:367
 msgid "Submit and Confirm"
 msgstr ""
 
-#: classes/class-pmprogateway-paypal.php:475
+#: classes/class-pmprogateway-paypal.php:477
 msgid "Could not create PayPal plan."
 msgstr ""
 
-#: classes/class-pmprogateway-paypal.php:511
+#: classes/class-pmprogateway-paypal.php:513
 msgid "Membership level at "
 msgstr ""
 
-#: classes/class-pmprogateway-paypal.php:528
+#: classes/class-pmprogateway-paypal.php:530
 msgid "Could not create PayPal product."
 msgstr ""
 
-#: classes/class-pmprogateway-paypal.php:665
-#: classes/class-pmprogateway-paypal.php:721
+#: classes/class-pmprogateway-paypal.php:667
+#: classes/class-pmprogateway-paypal.php:723
 msgid "Could not find PayPal approval link."
 msgstr ""
 
-#: classes/class-pmprogateway-paypal.php:743
+#: classes/class-pmprogateway-paypal.php:745
 msgid "This is not a token order."
 msgstr ""
 
-#: classes/class-pmprogateway-paypal.php:752
+#: classes/class-pmprogateway-paypal.php:754
 msgid "No PayPal order ID or subscription transaction ID found."
 msgstr ""
 
-#: classes/class-pmprogateway-paypal.php:760
+#: classes/class-pmprogateway-paypal.php:762
 msgid "Could not get order information."
 msgstr ""
 
-#: classes/class-pmprogateway-paypal.php:767
+#: classes/class-pmprogateway-paypal.php:769
 msgid "Could not capture payment."
 msgstr ""
 
-#: classes/class-pmprogateway-paypal.php:773
+#: classes/class-pmprogateway-paypal.php:775
 msgid "Order is not yet completed."
 msgstr ""
 
-#: classes/class-pmprogateway-paypal.php:785
+#: classes/class-pmprogateway-paypal.php:787
 msgid "Could not get subscription information."
 msgstr ""
 
-#: classes/class-pmprogateway-paypal.php:789
+#: classes/class-pmprogateway-paypal.php:791
 msgid "Subscription is not yet active."
 msgstr ""
 
-#: classes/class-pmprogateway-paypal.php:827
+#: classes/class-pmprogateway-paypal.php:829
 msgid "Cancelled by site admin or member."
 msgstr ""
 
-#: classes/class-pmprogateway-paypal.php:857
+#: classes/class-pmprogateway-paypal.php:859
 msgid "No subscription transaction ID."
 msgstr ""
 
-#: classes/class-pmprogateway-paypal.php:938
+#: classes/class-pmprogateway-paypal.php:940
 msgid "No transaction ID found for this order."
 msgstr ""
 
-#: classes/class-pmprogateway-paypal.php:965
+#: classes/class-pmprogateway-paypal.php:967
 #, php-format
 msgid "Refund processed successfully. PayPal refund ID: %s"
 msgstr ""
@@ -197,22 +197,22 @@ msgstr ""
 msgid "Check Out With %s"
 msgstr ""
 
-#: pmpro-paypal.php:132
+#: pmpro-paypal.php:133
 msgid "This add-on requires Paid Memberships Pro version 3.7.1 or later. Please update Paid Memberships Pro to use the PayPal Gateway."
 msgstr ""
 
-#: pmpro-paypal.php:149
+#: pmpro-paypal.php:150
 msgid "View Documentation"
 msgstr ""
 
-#: pmpro-paypal.php:149
+#: pmpro-paypal.php:150
 msgid "Docs"
 msgstr ""
 
-#: pmpro-paypal.php:150
+#: pmpro-paypal.php:151
 msgid "Visit Customer Support Forum"
 msgstr ""
 
-#: pmpro-paypal.php:150
+#: pmpro-paypal.php:151
 msgid "Support"
 msgstr ""
