@@ -43,6 +43,13 @@ function pmpro_paypal_handle_webhook( $request ) {
 			$message = pmpro_paypal_handle_checkout_order_approved( $resource );
 			break;
 
+		// A capture that was pending when the order was approved was completed, denied or declined.
+		case 'PAYMENT.CAPTURE.COMPLETED':
+		case 'PAYMENT.CAPTURE.DENIED':
+		case 'PAYMENT.CAPTURE.DECLINED':
+			$message = pmpro_paypal_handle_capture_status_change( $resource );
+			break;
+
 		// Subscription became active after buyer approval. Complete subscription checkout.
 		case 'BILLING.SUBSCRIPTION.ACTIVATED':
 			$message = pmpro_paypal_handle_subscription_activated( $resource );
@@ -219,11 +226,21 @@ function pmpro_paypal_handle_checkout_order_approved( $resource ) {
 	}
 
 	// Set payment transaction ID from capture.
+	$capture_status = $paypal_order['purchase_units'][0]['payments']['captures'][0]['status'] ?? '';
 	if ( ! empty( $paypal_order['purchase_units'][0]['payments']['captures'][0]['id'] ) ) {
 		$morder->payment_transaction_id = $paypal_order['purchase_units'][0]['payments']['captures'][0]['id'];
+		update_pmpro_membership_order_meta( $morder->id, 'paypal_capture_status', $capture_status );
 		update_pmpro_membership_order_meta( $morder->id, 'paypal_capture_id', $morder->payment_transaction_id );
 	}
 	$morder->saveOrder();
+
+	// A COMPLETED order can still hold a pending or declined capture.
+	if ( 'token' === $morder->status && 'COMPLETED' !== $capture_status ) {
+		if ( in_array( $capture_status, array( 'DECLINED', 'FAILED' ), true ) ) {
+			$morder->updateStatus( 'error' );
+		}
+		return 'Order #' . $morder->id . ' not paid. Capture status: ' . ( $capture_status ? $capture_status : 'unknown' );
+	}
 
 	// Complete checkout if still in token status.
 	if ( 'token' === $morder->status ) {
@@ -236,6 +253,59 @@ function pmpro_paypal_handle_checkout_order_approved( $resource ) {
 	}
 
 	return 'Order #' . $morder->id . ' already completed (status: ' . $morder->status . ').';
+}
+
+/**
+ * Handle PAYMENT.CAPTURE.COMPLETED / DENIED / DECLINED for a capture that was
+ * still pending when CHECKOUT.ORDER.APPROVED was handled.
+ *
+ * Completes checkout when the capture completes, or marks the order as error
+ * when it is declined.
+ */
+function pmpro_paypal_handle_capture_status_change( $resource ) {
+	global $wpdb;
+
+	$capture_id = $resource['id'] ?? '';
+	if ( empty( $capture_id ) ) {
+		return 'No capture ID in event.';
+	}
+
+	// Find the PMPro order by paypal_capture_id meta.
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Prepared lookup on the PMPro order meta table; no WP API for this reverse lookup.
+	$pmpro_order_id = $wpdb->get_var( $wpdb->prepare(
+		"SELECT pmpro_membership_order_id FROM {$wpdb->pmpro_membership_ordermeta} WHERE meta_key = 'paypal_capture_id' AND meta_value = %s LIMIT 1",
+		$capture_id
+	) );
+
+	if ( empty( $pmpro_order_id ) ) {
+		return 'No PMPro order found for capture ' . $capture_id;
+	}
+
+	$morder = new MemberOrder( $pmpro_order_id );
+	if ( empty( $morder->id ) ) {
+		return 'Could not load PMPro order #' . $pmpro_order_id;
+	}
+
+	// Captures that completed at approval were already handled by CHECKOUT.ORDER.APPROVED.
+	if ( 'token' !== $morder->status || 'PENDING' !== get_pmpro_membership_order_meta( $morder->id, 'paypal_capture_status', true ) ) {
+		return 'Order #' . $morder->id . ' has no pending capture (status: ' . $morder->status . ').';
+	}
+
+	$capture_status = $resource['status'] ?? '';
+	if ( 'COMPLETED' === $capture_status ) {
+		pmpro_pull_checkout_data_from_order( $morder );
+		if ( pmpro_complete_async_checkout( $morder ) ) {
+			return 'Order #' . $morder->id . ' completed successfully.';
+		} else {
+			return 'Order #' . $morder->id . ' failed to complete.';
+		}
+	}
+
+	if ( in_array( $capture_status, array( 'DECLINED', 'FAILED' ), true ) ) {
+		$morder->updateStatus( 'error' );
+	}
+
+	return 'Order #' . $morder->id . ' not paid. Capture status: ' . ( $capture_status ? $capture_status : 'unknown' );
 }
 
 /**

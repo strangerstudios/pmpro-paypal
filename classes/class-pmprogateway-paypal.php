@@ -314,6 +314,9 @@ class PMProGateway_paypal extends PMProGateway {
 			'CHECKOUT.ORDER.APPROVED',
 			'PAYMENT.SALE.COMPLETED',
 			'PAYMENT.SALE.REFUNDED',
+			'PAYMENT.CAPTURE.COMPLETED',
+			'PAYMENT.CAPTURE.DENIED',
+			'PAYMENT.CAPTURE.DECLINED',
 			'PAYMENT.CAPTURE.REFUNDED',
 			'BILLING.SUBSCRIPTION.ACTIVATED',
 			'BILLING.SUBSCRIPTION.CANCELLED',
@@ -778,6 +781,12 @@ class PMProGateway_paypal extends PMProGateway {
 			// Set payment transaction ID from capture.
 			if ( ! empty( $paypal_order['purchase_units'][0]['payments']['captures'][0]['id'] ) ) {
 				$order->payment_transaction_id = $paypal_order['purchase_units'][0]['payments']['captures'][0]['id'];
+			}
+
+			$capture_status = $paypal_order['purchase_units'][0]['payments']['captures'][0]['status'] ?? '';
+			if ( 'COMPLETED' !== $capture_status ) {
+				/* translators: %s: PayPal capture status, e.g. PENDING. */
+				return sprintf( __( 'Payment is not yet completed. Capture status: %s', 'pmpro-paypal' ), $capture_status );
 			}
 		} else {
 			// --- Subscription ---
