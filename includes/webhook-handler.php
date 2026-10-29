@@ -143,6 +143,8 @@ function pmpro_paypal_verify_webhook( $request ) {
 	$webhook_id  = get_option( 'pmpro_paypal_webhook_id' . $suffix );
 	if ( empty( $webhook_id ) ) {
 		// No webhook ID stored, so the signature can't be verified.
+		global $logstr;
+		$logstr .= 'No webhook ID stored for the ' . $environment . " environment.\n";
 		return false;
 	}
 
