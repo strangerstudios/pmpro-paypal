@@ -142,8 +142,8 @@ function pmpro_paypal_verify_webhook( $request ) {
 	$suffix      = 'sandbox' === $environment ? '_sandbox' : '_live';
 	$webhook_id  = get_option( 'pmpro_paypal_webhook_id' . $suffix );
 	if ( empty( $webhook_id ) ) {
-		// No webhook ID stored — can't verify. Allow in sandbox for testing.
-		return 'sandbox' === get_option( 'pmpro_gateway_environment' );
+		// No webhook ID stored, so the signature can't be verified.
+		return false;
 	}
 
 	$headers = $request->get_headers();
